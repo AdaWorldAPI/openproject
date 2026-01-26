@@ -1,0 +1,5 @@
+ja:
+  overviews:
+    label_home: "%{workspace_type} home"
+    label_dashboard: "ダッシュボード"
+    label_overview: "概要"
