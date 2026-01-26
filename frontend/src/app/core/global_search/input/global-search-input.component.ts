@@ -38,7 +38,7 @@ import {
 import { RecentItemsService } from 'core-app/core/recent-items.service';
 import { populateInputsFromDataset } from 'core-app/shared/components/dataset-inputs';
 import { ApiV3FilterBuilder } from 'core-app/shared/helpers/api-v3/api-v3-filter-builder';
-import { NgOption } from '@ng-select/ng-select/index';
+import { NgOption } from '@ng-select/ng-select';
 import { announce } from '@primer/live-region-element';
 
 interface SearchResultItem {
@@ -159,7 +159,7 @@ export class GlobalSearchInputComponent implements AfterViewInit, OnDestroy {
   }
 
   public set searchTerm(searchTerm:string) {
-    this.ngSelectComponent.ngSelectInstance.searchTerm = searchTerm;
+    (this.ngSelectComponent.ngSelectInstance as any).searchTerm = searchTerm;
   }
 
   public get searchTerm():string {
