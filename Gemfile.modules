@@ -43,4 +43,5 @@ group :opf_plugins do
   gem 'openproject-documents',                 path: 'modules/documents'
 
   gem 'openproject-bim',                       path: 'modules/bim'
+  gem 'openproject-msgraph_mail',              path: 'modules/msgraph_mail'
 end
