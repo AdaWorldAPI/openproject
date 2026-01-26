@@ -1,6 +1,6 @@
 # Railway-specific Dockerfile for OpenProject
-# Based on docker/prod/Dockerfile but without VOLUME directives
-# BIM support disabled to avoid dotnet/libicu conflicts on Debian Trixie
+# Radical update: all latest, no deprecated packages
+# BIM support disabled to avoid dotnet/libicu conflicts
 
 ARG RUBY_VERSION="3.4.7"
 ARG DEBIAN_BASE="trixie"
@@ -10,7 +10,6 @@ FROM ruby:${RUBY_VERSION}-slim-${DEBIAN_BASE} AS base
 LABEL maintainer="operations@openproject.com"
 
 ARG NODE_VERSION="22.21.0"
-# Disable BIM support to avoid dotnet dependency issues
 ARG BIM_SUPPORT=false
 ENV BIM_SUPPORT=false
 
@@ -51,7 +50,7 @@ WORKDIR $APP_PATH
 
 RUN gem install bundler --no-document
 
-# Copy and run preinstall with explicit bash
+# Copy and run preinstall
 COPY ./docker/prod/setup/preinstall-common.sh ./docker/prod/setup/preinstall-common.sh
 RUN chmod +x ./docker/prod/setup/preinstall-common.sh && bash ./docker/prod/setup/preinstall-common.sh
 
@@ -65,16 +64,17 @@ RUN chmod +x ./vendor/bundle-install.sh && bash ./vendor/bundle-install.sh && rm
 
 COPY . .
 
-# Make all scripts executable and run setup
-RUN chmod +x ./docker/prod/setup/*.sh && \
-  cp Gemfile.lock.bak Gemfile.lock && rm Gemfile.lock.bak && \
+# Make ALL scripts executable before any script runs
+RUN chmod +x bin/* && \
+    chmod +x ./docker/prod/setup/*.sh && \
+    chmod +x ./docker/prod/entrypoint-slim.sh ./docker/prod/web ./docker/prod/worker 2>/dev/null || true
+
+# Run setup
+RUN cp Gemfile.lock.bak Gemfile.lock && rm Gemfile.lock.bak && \
   bash ./docker/prod/setup/precompile-assets.sh && \
   bash ./docker/prod/setup/postinstall-common.sh && \
   cp ./config/database.production.yml config/database.yml && \
   ln -s $APP_PATH/docker/prod/setup/.irbrc /home/$APP_USER/
-
-# Make entrypoint and runtime scripts executable
-RUN chmod +x ./docker/prod/entrypoint-slim.sh ./docker/prod/web ./docker/prod/worker 2>/dev/null || true
 
 # -------------------------------------
 # slim for Railway (no VOLUME directive)
