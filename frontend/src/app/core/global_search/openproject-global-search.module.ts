@@ -31,6 +31,7 @@ import { OpenprojectWorkPackagesModule } from 'core-app/features/work-packages/o
 import { GlobalSearchInputComponent } from 'core-app/core/global_search/input/global-search-input.component';
 import { GlobalSearchWorkPackagesComponent } from 'core-app/core/global_search/global-search-work-packages.component';
 import { GlobalSearchService } from 'core-app/core/global_search/services/global-search.service';
+import { GlobalSearchTabsComponent } from 'core-app/core/global_search/tabs/global-search-tabs.component';
 import {
   OpenprojectAutocompleterModule,
 } from 'core-app/shared/components/autocompleter/openproject-autocompleter.module';
@@ -50,6 +51,7 @@ import { RecentItemsService } from 'core-app/core/recent-items.service';
   declarations: [
     GlobalSearchInputComponent,
     GlobalSearchWorkPackagesComponent,
+    GlobalSearchTabsComponent,
   ],
 })
 export class OpenprojectGlobalSearchModule {

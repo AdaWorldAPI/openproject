@@ -41,7 +41,8 @@
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "sass",
             "assets": [
-              "src/assets"
+              "src/assets",
+              { "glob": "**/*.json", "input": "src/locales", "output": "/locales" }
             ],
             "styles": [
               {

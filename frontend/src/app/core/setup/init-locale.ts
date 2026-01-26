@@ -83,9 +83,16 @@ export function initializeLocale() {
     .chain([userLocale, instanceLocale])
     .uniq()
     .map(
-      (locale) => import(/* webpackChunkName: "locale" */ `../../../locales/${locale}.json`)
-        .then((imported:{ default:object }) => {
-          i18n.store(imported.default);
+      (locale) => fetch(`/assets/frontend/locales/${locale}.json`)
+        .then((response) => {
+          if (!response.ok) throw new Error(`Locale ${locale} not found`);
+          return response.json();
+        })
+        .then((data:object) => {
+          i18n.store(data);
+        })
+        .catch(() => {
+          // Locale file not available, skip silently
         }),
       )
     .value();
