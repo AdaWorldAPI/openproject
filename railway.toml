@@ -2,22 +2,13 @@
 # https://docs.railway.app/deploy/config-as-code
 
 [build]
-# Use the production Dockerfile
 dockerfilePath = "docker/prod/Dockerfile"
-# Build the slim target (external DB) for Railway
-# Railway provides Postgres as a separate service
 buildTarget = "slim"
 
 [deploy]
-# Health check
 healthcheckPath = "/health_checks/default"
 healthcheckTimeout = 120
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
-
-# Resource configuration
 numReplicas = 1
-
-[deploy.startCommand]
-# Use the web entrypoint
-value = "./docker/prod/entrypoint-slim.sh ./docker/prod/web"
+startCommand = "./docker/prod/entrypoint-slim.sh ./docker/prod/web"
