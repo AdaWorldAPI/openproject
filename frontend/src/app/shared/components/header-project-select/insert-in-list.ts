@@ -21,6 +21,7 @@ export const insertInList = (
       ...list,
       {
         id: project.id,
+        identifier: project.identifier,
         name: project.name,
         href: project._links.self.href,
         _type: project._type,
@@ -53,6 +54,7 @@ export const insertInList = (
     ...list,
     {
       id: ancestorProject.id,
+      identifier: ancestorProject.identifier,
       name: ancestorProject.name,
       href: ancestorProject._links.self.href,
       _type: project._type,

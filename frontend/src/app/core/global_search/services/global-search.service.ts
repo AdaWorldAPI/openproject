@@ -27,24 +27,45 @@
 //++
 
 import { Injectable, Injector } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { I18nService } from 'core-app/core/i18n/i18n.service';
 import { CurrentProjectService } from 'core-app/core/current-project/current-project.service';
-
 import { PathHelperService } from 'core-app/core/path-helper/path-helper.service';
+import { TabDefinition } from 'core-app/shared/components/tabs/tab.interface';
 
 @Injectable()
 export class GlobalSearchService {
+  private _currentTab$:BehaviorSubject<string>;
+  private _tabs$:BehaviorSubject<TabDefinition[]>;
+
+  public currentTab$:Observable<string>;
+  public tabs$:Observable<TabDefinition[]>;
+
+  public set currentTab(tabId:string) {
+    this._currentTab$.next(tabId);
+  }
+
+  public get currentTab():string {
+    return this._currentTab$.value;
+  }
+
   constructor(
     protected I18n:I18nService,
     protected injector:Injector,
     protected PathHelper:PathHelperService,
     protected currentProjectService:CurrentProjectService,
   ) {
+    this._currentTab$ = new BehaviorSubject<string>(this.initialTab());
+    this._tabs$ = new BehaviorSubject<TabDefinition[]>(this.defaultTabs());
+    this.currentTab$ = this._currentTab$.asObservable();
+    this.tabs$ = this._tabs$.asObservable();
   }
 
-  public submitSearch(query:string, scope:string):void {
-    const path = this.searchPath(scope);
-    const params = this.searchQueryParams(query, scope);
+  public submitSearch(query?:string, scope?:string):void {
+    const searchQuery = query ?? this.currentQuery();
+    const searchScope = scope ?? this.currentTab;
+    const path = this.searchPath(searchScope);
+    const params = this.searchQueryParams(searchQuery, searchScope);
     window.location.href = `${path}?${params}`;
   }
 
@@ -67,5 +88,22 @@ export class GlobalSearchService {
     }
 
     return params.toString();
+  }
+
+  private currentQuery():string {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('q') || '';
+  }
+
+  private initialTab():string {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('filter') || 'work_packages';
+  }
+
+  private defaultTabs():TabDefinition[] {
+    return [
+      { id: 'all', name: this.I18n.t('js.label_all') },
+      { id: 'work_packages', name: this.I18n.t('js.work_packages.label_work_package_plural') },
+    ];
   }
 }
