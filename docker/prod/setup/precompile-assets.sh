@@ -7,6 +7,10 @@ if [ -f config/frontend_assets.manifest.json ]; then
   echo "Assets have already been precompiled. Reusing."
 else
   echo "Assets need to be compiled"
+  
+  # Ensure bin scripts are executable
+  chmod +x bin/* 2>/dev/null || true
+  
   JOBS=8 npm install
 
   SECRET_KEY_BASE=1 RAILS_ENV=production DATABASE_URL=nulldb://db \
