@@ -4,8 +4,6 @@ Gem::Specification.new do |s|
   s.name        = "openproject-msgraph_mail"
   s.version     = "1.0.0"
   s.authors     = ["Jan Hübener"]
-  s.email       = ["jan@datagroup.de"]
-  s.homepage    = "https://github.com/AdaWorldAPI/openproject"
   s.summary     = "Microsoft Graph Mail Delivery for OpenProject"
   s.description = "Provides Microsoft Graph API mail delivery method for OpenProject, " \
                   "enabling email sending via Microsoft 365 / Azure AD OAuth2"
