@@ -1,0 +1,83 @@
+# OpenProject Production Docker Compose
+# For testing MS Graph Mail integration
+#
+# Usage:
+#   1. Copy .env.example to .env and fill in values
+#   2. docker compose -f docker-compose.prod.yml up -d
+#   3. Access at http://localhost:8080
+#
+# For Railway deployment, use the Dockerfile directly with these env vars.
+
+networks:
+  openproject:
+
+volumes:
+  pgdata:
+  opdata:
+
+services:
+  openproject:
+    build:
+      context: .
+      dockerfile: ./docker/prod/Dockerfile
+      target: all-in-one
+    ports:
+      - "${PORT:-8080}:80"
+    environment:
+      # Core settings
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-please_change_me_in_production_12345678901234567890}
+      OPENPROJECT_HTTPS: ${OPENPROJECT_HTTPS:-false}
+      OPENPROJECT_HOST__NAME: ${OPENPROJECT_HOST__NAME:-localhost:8080}
+      
+      # Database (internal postgres for all-in-one, or external)
+      # DATABASE_URL: ${DATABASE_URL:-}  # Uncomment for external DB
+      
+      # MS Graph Mail Configuration
+      OPENPROJECT_EMAIL_DELIVERY_METHOD: ${OPENPROJECT_EMAIL_DELIVERY_METHOD:-smtp}
+      MSGRAPH_TENANT_ID: ${MSGRAPH_TENANT_ID:-}
+      MSGRAPH_CLIENT_ID: ${MSGRAPH_CLIENT_ID:-}
+      MSGRAPH_CLIENT_SECRET: ${MSGRAPH_CLIENT_SECRET:-}
+      MSGRAPH_SENDER_EMAIL: ${MSGRAPH_SENDER_EMAIL:-}
+      MSGRAPH_SENDER_NAME: ${MSGRAPH_SENDER_NAME:-OpenProject}
+      MSGRAPH_SAVE_TO_SENT_ITEMS: ${MSGRAPH_SAVE_TO_SENT_ITEMS:-true}
+      
+      # Fallback SMTP settings (if not using MS Graph)
+      OPENPROJECT_SMTP_ADDRESS: ${SMTP_ADDRESS:-}
+      OPENPROJECT_SMTP_PORT: ${SMTP_PORT:-587}
+      OPENPROJECT_SMTP_DOMAIN: ${SMTP_DOMAIN:-}
+      OPENPROJECT_SMTP_USER_NAME: ${SMTP_USER:-}
+      OPENPROJECT_SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      OPENPROJECT_SMTP_ENABLE_STARTTLS_AUTO: ${SMTP_STARTTLS:-true}
+      OPENPROJECT_SMTP_AUTHENTICATION: ${SMTP_AUTH:-login}
+      
+      # Mail sender
+      OPENPROJECT_MAIL__FROM: ${MAIL_FROM:-openproject@example.com}
+    volumes:
+      - opdata:/var/openproject/assets
+      - pgdata:/var/openproject/pgdata
+    networks:
+      - openproject
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/health_checks/default"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+
+  # Optional: Separate worker for background jobs
+  # Uncomment if you want dedicated worker processes
+  # worker:
+  #   build:
+  #     context: .
+  #     dockerfile: ./docker/prod/Dockerfile
+  #     target: slim
+  #   command: ["./docker/prod/worker"]
+  #   environment:
+  #     DATABASE_URL: ${DATABASE_URL}
+  #     SECRET_KEY_BASE: ${SECRET_KEY_BASE}
+  #     RAILS_ENV: production
+  #     # ... same MS Graph vars as above
+  #   depends_on:
+  #     - openproject
+  #   networks:
+  #     - openproject
