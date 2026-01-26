@@ -2,7 +2,7 @@
 # https://docs.railway.app/deploy/config-as-code
 
 [build]
-dockerfilePath = "docker/prod/Dockerfile"
+dockerfilePath = "Dockerfile.railway"
 buildTarget = "slim"
 
 [deploy]
