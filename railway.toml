@@ -1,5 +1,4 @@
 # Railway deployment configuration for OpenProject
-# https://docs.railway.app/deploy/config-as-code
 
 [build]
 dockerfilePath = "Dockerfile.railway"
@@ -11,4 +10,6 @@ healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 numReplicas = 1
-startCommand = "./docker/prod/entrypoint-slim.sh ./docker/prod/web"
+
+# Let Puma bind to 0.0.0.0 on Railway's PORT
+startCommand = "BIND=0.0.0.0 ./docker/prod/entrypoint-slim.sh ./docker/prod/web"
