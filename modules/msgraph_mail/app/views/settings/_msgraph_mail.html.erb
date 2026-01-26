@@ -1,0 +1,134 @@
+<%#-- copyright
+OpenProject MS Graph Mail Module
+Copyright (C) 2025 Jan Hübener / DATAGROUP SE
+
+This program is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public License version 3.
+--%>
+
+<% 
+# Settings partial for MS Graph Mail configuration in OpenProject admin
+# This is displayed in Administration > Plugins > MS Graph Mail > Configure
+%>
+
+<section class="form--section">
+  <fieldset class="form--fieldset">
+    <legend class="form--fieldset-legend">Microsoft Graph Mail Settings</legend>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_tenant_id]', 'Azure AD Tenant ID' %>
+      <div class="form--field-container">
+        <%= styled_text_field_tag 'settings[msgraph_tenant_id]', 
+            @settings['msgraph_tenant_id'], 
+            placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+            class: 'form--text-field -wide' %>
+      </div>
+      <div class="form--field-instructions">
+        Your Azure AD Tenant ID (Directory ID). Find it in Azure Portal > Azure Active Directory > Overview.
+      </div>
+    </div>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_client_id]', 'Application (Client) ID' %>
+      <div class="form--field-container">
+        <%= styled_text_field_tag 'settings[msgraph_client_id]', 
+            @settings['msgraph_client_id'],
+            placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+            class: 'form--text-field -wide' %>
+      </div>
+      <div class="form--field-instructions">
+        The Application ID from your Azure AD App Registration.
+      </div>
+    </div>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_client_secret]', 'Client Secret' %>
+      <div class="form--field-container">
+        <%= styled_password_field_tag 'settings[msgraph_client_secret]', 
+            @settings['msgraph_client_secret'],
+            placeholder: 'Enter client secret',
+            class: 'form--text-field -wide',
+            autocomplete: 'off' %>
+      </div>
+      <div class="form--field-instructions">
+        A client secret from your Azure AD App Registration > Certificates & secrets.
+      </div>
+    </div>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_sender_email]', 'Sender Email Address' %>
+      <div class="form--field-container">
+        <%= styled_text_field_tag 'settings[msgraph_sender_email]', 
+            @settings['msgraph_sender_email'],
+            placeholder: 'noreply@yourdomain.com',
+            class: 'form--text-field -wide' %>
+      </div>
+      <div class="form--field-instructions">
+        The email address that will send emails. This mailbox must exist and the app must have Mail.Send permission.
+      </div>
+    </div>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_sender_name]', 'Sender Display Name' %>
+      <div class="form--field-container">
+        <%= styled_text_field_tag 'settings[msgraph_sender_name]', 
+            @settings['msgraph_sender_name'] || 'OpenProject',
+            placeholder: 'OpenProject',
+            class: 'form--text-field -wide' %>
+      </div>
+      <div class="form--field-instructions">
+        The display name shown as the sender (default: OpenProject).
+      </div>
+    </div>
+
+    <div class="form--field">
+      <%= styled_label_tag 'settings[msgraph_save_to_sent_items]', 'Save to Sent Items' %>
+      <div class="form--field-container">
+        <%= styled_check_box_tag 'settings[msgraph_save_to_sent_items]', 
+            '1',
+            @settings['msgraph_save_to_sent_items'] != false,
+            class: 'form--check-box' %>
+      </div>
+      <div class="form--field-instructions">
+        If checked, sent emails will be saved in the sender's Sent Items folder.
+      </div>
+    </div>
+  </fieldset>
+</section>
+
+<section class="form--section">
+  <fieldset class="form--fieldset">
+    <legend class="form--fieldset-legend">Azure AD Setup Instructions</legend>
+    
+    <div class="form--field-instructions">
+      <ol>
+        <li>In Azure Portal, go to <strong>Azure Active Directory</strong> > <strong>App registrations</strong></li>
+        <li>Click <strong>New registration</strong>, name it "OpenProject Mail", select "Accounts in this organizational directory only"</li>
+        <li>After creation, note the <strong>Application (client) ID</strong> and <strong>Directory (tenant) ID</strong></li>
+        <li>Go to <strong>Certificates & secrets</strong> > <strong>New client secret</strong>, copy the secret value</li>
+        <li>Go to <strong>API permissions</strong> > <strong>Add a permission</strong> > <strong>Microsoft Graph</strong></li>
+        <li>Select <strong>Application permissions</strong> > <strong>Mail.Send</strong></li>
+        <li>Click <strong>Grant admin consent</strong> for your organization</li>
+        <li>Set the delivery method environment variable: <code>OPENPROJECT_EMAIL_DELIVERY_METHOD=msgraph</code></li>
+      </ol>
+    </div>
+  </fieldset>
+</section>
+
+<section class="form--section">
+  <fieldset class="form--fieldset">
+    <legend class="form--fieldset-legend">Environment Variables (Alternative)</legend>
+    
+    <div class="form--field-instructions">
+      <p>Instead of configuring here, you can set these environment variables:</p>
+      <pre style="background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto;">
+OPENPROJECT_EMAIL_DELIVERY_METHOD=msgraph
+MSGRAPH_TENANT_ID=your-tenant-id
+MSGRAPH_CLIENT_ID=your-client-id
+MSGRAPH_CLIENT_SECRET=your-client-secret
+MSGRAPH_SENDER_EMAIL=noreply@yourdomain.com
+MSGRAPH_SENDER_NAME=OpenProject
+MSGRAPH_SAVE_TO_SENT_ITEMS=true</pre>
+    </div>
+  </fieldset>
+</section>
