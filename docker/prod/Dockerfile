@@ -72,7 +72,9 @@ RUN bash vendor/bundle-install.sh && rm vendor/bundle-install.sh
 COPY . .
 
 # Copy lock file again as the updated version was overriden by COPY just now
+# FIX: Add chmod +x bin/* to ensure rails and other scripts are executable
 RUN cp Gemfile.lock.bak Gemfile.lock && rm Gemfile.lock.bak && \
+  chmod +x bin/* && \
   ./docker/prod/setup/precompile-assets.sh && \
   ./docker/prod/setup/postinstall-common.sh && \
   cp ./config/database.production.yml config/database.yml && \
