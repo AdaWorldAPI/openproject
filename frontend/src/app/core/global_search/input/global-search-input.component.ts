@@ -234,7 +234,7 @@ export class GlobalSearchInputComponent implements AfterViewInit, OnDestroy {
   public onFocusOut():void {
     if (!this.deviceService.isMobile) {
       this.expanded = (this.searchTerm !== null && this.searchTerm.length > 0);
-      this.ngSelectComponent.ngSelectInstance.isOpen = false;
+      this.ngSelectComponent.ngSelectInstance.close();
       this.selectedItem = undefined;
       this.toggleTopMenuClass();
     }
