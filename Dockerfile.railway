@@ -85,5 +85,5 @@ FROM base AS slim
 
 USER $APP_USER
 EXPOSE 8080
-CMD ["./docker/prod/web"]
-ENTRYPOINT ["/usr/bin/tini", "--", "./docker/prod/entrypoint-slim.sh"]
+CMD ["/app/docker/prod/web"]
+ENTRYPOINT ["/app/docker/prod/entrypoint-slim.sh"]
