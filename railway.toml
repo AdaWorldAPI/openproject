@@ -10,7 +10,5 @@ healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
 numReplicas = 1
-
-# Run migrations then start web server
-# MIGRATE=true tells the web script to run db:migrate first
-startCommand = "MIGRATE=true BIND=0.0.0.0 ./docker/prod/entrypoint-slim.sh ./docker/prod/web"
+# Let Dockerfile ENTRYPOINT/CMD handle startup
+# No startCommand override
