@@ -2,7 +2,7 @@
 # Radical update: all latest, no deprecated packages
 # BIM support disabled to avoid dotnet/libicu conflicts
 
-ARG CACHE_BUST="2026-01-27-06:45"
+ARG CACHE_BUST="2026-01-27-v3-force-tini"
 ARG RUBY_VERSION="3.4.7"
 ARG DEBIAN_BASE="trixie"
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
