@@ -38,10 +38,10 @@ threads_max_count = OpenProject::Configuration.web_max_threads
 threads threads_min_count, [threads_min_count, threads_max_count].max
 
 # Specifies the address on which Puma will listen on to receive requests; default is localhost.
-set_default_host ENV.fetch("HOST") { "localhost" }
+set_default_host "0.0.0.0"  # Railway: must bind to 0.0.0.0
 
 # Specifies the port that Puma will listen on to receive requests; default is 3000.
-port ENV.fetch("PORT") { 3000 }.to_i
+port 8080  # Railway: hardcoded for healthcheck
 
 # Specifies the environment that Puma will run in.
 environment ENV.fetch("RAILS_ENV") { "development" }
