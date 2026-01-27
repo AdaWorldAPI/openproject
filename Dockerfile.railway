@@ -6,6 +6,7 @@ ARG RUBY_VERSION="3.4.7"
 ARG DEBIAN_BASE="trixie"
 ARG BUILDKIT_SBOM_SCAN_CONTEXT=true
 ARG BUILDKIT_SBOM_SCAN_STAGE=true
+# Cache bust: 2026-01-27-v1
 FROM ruby:${RUBY_VERSION}-slim-${DEBIAN_BASE} AS base
 LABEL maintainer="operations@openproject.com"
 
