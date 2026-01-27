@@ -1,6 +1,6 @@
 #!/bin/bash
 set -euxo pipefail
-# Cache bust: 2026-01-27-v2 - ensures tini is installed
+# Cache bust: 2026-01-27-v3 - ensures tini is installed
 
 get_architecture() {
 	if command -v uname > /dev/null; then
