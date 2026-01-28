@@ -4,6 +4,7 @@ BIND="${BIND:=0.0.0.0}"
 PORT="${PORT:=8080}"
 RAILS_ENV="${RAILS_ENV:="development"}"
 MIGRATE="${MIGRATE:="false"}"
+SEED="${SEED:="false"}"
 
 if [ "$RAILS_ENV" = "production" ] ; then
 	# @TODO Add apache config to serve the assets. Until then we have Puma serve
@@ -15,6 +16,19 @@ fi
 if [ "$MIGRATE" = "true" ]; then
 	echo "Migrating database..."
 	bundle exec rake db:migrate
+fi
+
+if [ "$SEED" = "true" ]; then
+	echo "Seeding database..."
+	bundle exec rake db:seed
+fi
+
+# Reset admin password from environment variable if configured.
+# Runs on every startup when env vars are set, ensuring admin
+# can always log in with the password configured in Railway.
+if [ -n "$OPENPROJECT_SEED_ADMIN_USER_PASSWORD" ] || [ -n "$OPENPROJECT_SEED__ADMIN__USER__PASSWORD" ]; then
+	echo "Resetting admin password from environment..."
+	bundle exec rake admin:reset_password 2>/dev/null || echo "Admin password reset skipped (admin user not found)"
 fi
 
 # Clean up any dangling PID file
