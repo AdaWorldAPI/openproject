@@ -1,10 +1,13 @@
 #!/bin/bash -e
 
 BIND="${BIND:=0.0.0.0}"
-PORT="${PORT:=8080}"
-RAILS_ENV="${RAILS_ENV:="development"}"
+# Hardcode 8080 for Railway - ignore Railway's dynamic PORT
+PORT="8080"
+RAILS_ENV="${RAILS_ENV:="production"}"
 MIGRATE="${MIGRATE:="false"}"
 SEED="${SEED:="false"}"
+
+echo "Starting OpenProject on ${BIND}:${PORT}..."
 
 if [ "$RAILS_ENV" = "production" ] ; then
 	# @TODO Add apache config to serve the assets. Until then we have Puma serve
@@ -33,6 +36,8 @@ fi
 
 # Clean up any dangling PID file
 rm -f ${APP_PATH}/tmp/pids/*
+
+echo "Launching Puma on port ${PORT}..."
 
 # see `config/puma.rb` for configuration
 exec bundle exec rails server -u puma -b $BIND -p $PORT
