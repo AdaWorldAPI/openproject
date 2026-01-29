@@ -1,33 +1,64 @@
 en:
   msgraph_mail:
-    label_msgraph: "Microsoft Graph"
-    label_msgraph_description: "Send emails via Microsoft 365 using Azure AD application credentials."
-    label_configuration_status: "Configuration Status"
-    label_tenant_id: "Tenant ID"
-    label_client_id: "Client ID"
-    label_client_secret: "Client Secret"
-    label_sender_email: "Sender Email"
-    label_save_to_sent: "Save to Sent Items"
-    label_configured: "Configured"
-    label_not_configured: "Not configured"
-    label_hidden: "(hidden)"
-    label_yes: "Yes"
-    label_no: "No"
-    text_configuration_complete: "MS Graph Mail is fully configured and ready to use."
-    text_configuration_incomplete: "Configuration incomplete. Set the following environment variables:"
-    text_module_not_loaded: "The openproject-msgraph_mail module is selected but not properly loaded. Please check that the module is installed and restart OpenProject."
-    text_azure_requirements: "Azure AD App Requirements:"
-    text_mail_send_permission: "API Permission: Mail.Send (Application type)"
-    text_admin_consent: "Admin consent granted for the permission"
-    text_sender_mailbox: "Sender mailbox must exist in the tenant"
-    env_vars:
-      tenant_id: "Set MSGRAPH_TENANT_ID"
-      client_id: "Set MSGRAPH_CLIENT_ID"
-      client_secret: "Set MSGRAPH_CLIENT_SECRET"
-      sender_email: "Set MSGRAPH_SENDER_EMAIL"
-      save_to_sent: "Set MSGRAPH_SAVE_TO_SENT_ITEMS=false to disable"
-    instructions:
-      tenant_id: "Azure AD tenant ID"
-      client_id: "App registration client ID"
-      client_secret: "App registration client secret"
-      sender_email: "Email address to send from"
+    menu_title: "MS Graph Mail"
+    settings:
+      status: "Status"
+      configuration: "Configuration"
+      actions: "Actions"
+      azure_setup: "Azure AD Setup"
+      
+      delivery_method: "Email Delivery Method"
+      active: "MS Graph Mail is ACTIVE"
+      inactive: "Inactive (current method: %{current})"
+      
+      variable: "Environment Variable"
+      value: "Value"
+      not_set: "Not set"
+      
+      env_instructions_html: >
+        Configure MS Graph Mail using environment variables. 
+        Set these in your deployment configuration or <code>.env</code> file.
+      
+      configuration_complete: "All required settings are configured."
+      configuration_incomplete: "Configuration is incomplete. Please set all required environment variables."
+      configuration_invalid: "Configuration is incomplete. Please set all required environment variables."
+      configure_first: "Please configure all required environment variables before using these actions."
+      
+      test_connection: "Test Connection"
+      test_connection_success: "Successfully connected to Microsoft Graph API!"
+      test_connection_failed: "Connection failed: %{error}"
+      
+      send_test_email: "Send Test Email"
+      test_email_sent: "Test email sent to %{email}"
+      test_email_failed: "Failed to send test email: %{error}"
+      
+      activate_msgraph: "Activate MS Graph Mail"
+      activate_confirm: "This will switch email delivery from the current method to MS Graph. Continue?"
+      activated: "MS Graph Mail has been activated as the email delivery method."
+      activation_failed: "Failed to activate: %{error}"
+      cannot_activate_invalid: "Cannot activate - configuration is incomplete."
+      
+      deactivate: "Deactivate"
+      deactivate_confirm: "This will switch email delivery back to SMTP. Continue?"
+      deactivated: "MS Graph Mail has been deactivated. Email delivery is now set to SMTP."
+      deactivation_failed: "Failed to deactivate: %{error}"
+      
+      azure_instructions: "To use MS Graph Mail, you need to register an application in Azure AD:"
+      azure_step1_html: >
+        Go to <a href="https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade" 
+        target="_blank" rel="noopener">Azure Portal → App registrations</a>
+      azure_step2: "Create a new registration (or select an existing one)"
+      azure_step3: "Note the Application (client) ID and Directory (tenant) ID"
+      azure_step4: "Under 'Certificates & secrets', create a new client secret"
+      azure_step5: "Under 'API permissions', add: Microsoft Graph → Application permissions → Mail.Send, then grant admin consent"
+      
+      required_permissions: "Required API Permissions"
+      permission_mail_send: "Send mail as any user (Application permission)"
+
+  activerecord:
+    errors:
+      models:
+        msgraph_mail:
+          attributes:
+            base:
+              invalid_configuration: "MS Graph Mail configuration is invalid"
