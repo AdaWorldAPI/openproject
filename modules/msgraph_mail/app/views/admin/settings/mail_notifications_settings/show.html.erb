@@ -133,99 +133,98 @@ See COPYRIGHT and LICENSE files for more details.
       <%= "hidden" unless Setting.email_delivery_method == :msgraph %>>
       
       <div class="form--field-instructions" style="margin-bottom: 1rem;">
-        <p><strong>Microsoft Graph API</strong></p>
-        <p>Send emails via Microsoft 365 using Azure AD application credentials.</p>
+        <p><strong><%= t('msgraph_mail.label_msgraph') %></strong></p>
+        <p><%= t('msgraph_mail.label_msgraph_description') %></p>
       </div>
 
       <% if defined?(OpenProject::MsgraphMail) && OpenProject::MsgraphMail.respond_to?(:configuration) %>
         <% msgraph_config = OpenProject::MsgraphMail.configuration %>
         
         <div class="form--field">
-          <label class="form--label">Tenant ID</label>
+          <label class="form--label"><%= t('msgraph_mail.label_tenant_id') %></label>
           <div class="form--field-container">
             <% if msgraph_config.tenant_id.present? %>
               <span class="form--field-value" style="color: #1a7f37;">✓ <%= msgraph_config.tenant_id.truncate(20) %></span>
             <% else %>
-              <span class="form--field-value" style="color: #cf222e;">✗ Not configured</span>
-              <span class="form--field-instructions">Set <code>MSGRAPH_TENANT_ID</code></span>
+              <span class="form--field-value" style="color: #cf222e;">✗ <%= t('msgraph_mail.label_not_configured') %></span>
+              <span class="form--field-instructions"><%= t('msgraph_mail.env_vars.tenant_id') %></span>
             <% end %>
           </div>
         </div>
 
         <div class="form--field">
-          <label class="form--label">Client ID</label>
+          <label class="form--label"><%= t('msgraph_mail.label_client_id') %></label>
           <div class="form--field-container">
             <% if msgraph_config.client_id.present? %>
               <span class="form--field-value" style="color: #1a7f37;">✓ <%= msgraph_config.client_id.truncate(20) %></span>
             <% else %>
-              <span class="form--field-value" style="color: #cf222e;">✗ Not configured</span>
-              <span class="form--field-instructions">Set <code>MSGRAPH_CLIENT_ID</code></span>
+              <span class="form--field-value" style="color: #cf222e;">✗ <%= t('msgraph_mail.label_not_configured') %></span>
+              <span class="form--field-instructions"><%= t('msgraph_mail.env_vars.client_id') %></span>
             <% end %>
           </div>
         </div>
 
         <div class="form--field">
-          <label class="form--label">Client Secret</label>
+          <label class="form--label"><%= t('msgraph_mail.label_client_secret') %></label>
           <div class="form--field-container">
             <% if msgraph_config.client_secret.present? %>
-              <span class="form--field-value" style="color: #1a7f37;">✓ Configured (hidden)</span>
+              <span class="form--field-value" style="color: #1a7f37;">✓ <%= t('msgraph_mail.label_configured') %> <%= t('msgraph_mail.label_hidden') %></span>
             <% else %>
-              <span class="form--field-value" style="color: #cf222e;">✗ Not configured</span>
-              <span class="form--field-instructions">Set <code>MSGRAPH_CLIENT_SECRET</code></span>
+              <span class="form--field-value" style="color: #cf222e;">✗ <%= t('msgraph_mail.label_not_configured') %></span>
+              <span class="form--field-instructions"><%= t('msgraph_mail.env_vars.client_secret') %></span>
             <% end %>
           </div>
         </div>
 
         <div class="form--field">
-          <label class="form--label">Sender Email</label>
+          <label class="form--label"><%= t('msgraph_mail.label_sender_email') %></label>
           <div class="form--field-container">
             <% if msgraph_config.sender_email.present? %>
               <span class="form--field-value" style="color: #1a7f37;">✓ <%= msgraph_config.sender_email %></span>
             <% else %>
-              <span class="form--field-value" style="color: #cf222e;">✗ Not configured</span>
-              <span class="form--field-instructions">Set <code>MSGRAPH_SENDER_EMAIL</code></span>
+              <span class="form--field-value" style="color: #cf222e;">✗ <%= t('msgraph_mail.label_not_configured') %></span>
+              <span class="form--field-instructions"><%= t('msgraph_mail.env_vars.sender_email') %></span>
             <% end %>
           </div>
         </div>
 
         <div class="form--field">
-          <label class="form--label">Save to Sent Items</label>
+          <label class="form--label"><%= t('msgraph_mail.label_save_to_sent') %></label>
           <div class="form--field-container">
-            <span class="form--field-value"><%= msgraph_config.save_to_sent_items ? 'Yes' : 'No' %></span>
-            <span class="form--field-instructions">Set <code>MSGRAPH_SAVE_TO_SENT_ITEMS=false</code> to disable</span>
+            <span class="form--field-value"><%= msgraph_config.save_to_sent_items ? t('msgraph_mail.label_yes') : t('msgraph_mail.label_no') %></span>
+            <span class="form--field-instructions"><%= t('msgraph_mail.env_vars.save_to_sent') %></span>
           </div>
         </div>
 
         <% if msgraph_config.valid? %>
           <div class="flash notice" style="margin-top: 1rem;">
-            <p>✓ MS Graph Mail is fully configured and ready to use.</p>
+            <p>✓ <%= t('msgraph_mail.text_configuration_complete') %></p>
           </div>
         <% else %>
           <div class="flash error" style="margin-top: 1rem;">
-            <p><strong>Configuration incomplete.</strong> Set the following environment variables:</p>
+            <p><strong><%= t('msgraph_mail.text_configuration_incomplete') %></strong></p>
             <ul style="margin: 0.5rem 0 0 1.5rem;">
-              <li><code>MSGRAPH_TENANT_ID</code> - Azure AD tenant ID</li>
-              <li><code>MSGRAPH_CLIENT_ID</code> - App registration client ID</li>
-              <li><code>MSGRAPH_CLIENT_SECRET</code> - App registration client secret</li>
-              <li><code>MSGRAPH_SENDER_EMAIL</code> - Email address to send from</li>
+              <li><code>MSGRAPH_TENANT_ID</code> - <%= t('msgraph_mail.instructions.tenant_id') %></li>
+              <li><code>MSGRAPH_CLIENT_ID</code> - <%= t('msgraph_mail.instructions.client_id') %></li>
+              <li><code>MSGRAPH_CLIENT_SECRET</code> - <%= t('msgraph_mail.instructions.client_secret') %></li>
+              <li><code>MSGRAPH_SENDER_EMAIL</code> - <%= t('msgraph_mail.instructions.sender_email') %></li>
             </ul>
           </div>
         <% end %>
 
       <% else %>
         <div class="flash error">
-          <p><strong>Module not loaded.</strong></p>
-          <p>The <code>openproject-msgraph_mail</code> module is selected but not properly loaded. 
-             Please check that the module is installed and restart OpenProject.</p>
+          <p><strong>Module not loaded</strong></p>
+          <p><%= t('msgraph_mail.text_module_not_loaded') %></p>
         </div>
       <% end %>
       
       <div class="form--field-instructions" style="margin-top: 1rem; padding: 0.75rem; background: #f6f8fa; border-radius: 6px;">
-        <p style="margin: 0 0 0.5rem 0;"><strong>Azure AD App Requirements:</strong></p>
+        <p style="margin: 0 0 0.5rem 0;"><strong><%= t('msgraph_mail.text_azure_requirements') %></strong></p>
         <ul style="margin: 0; padding-left: 1.25rem;">
-          <li>API Permission: <code>Mail.Send</code> (Application type)</li>
-          <li>Admin consent granted for the permission</li>
-          <li>Sender mailbox must exist in the tenant</li>
+          <li><%= t('msgraph_mail.text_mail_send_permission') %></li>
+          <li><%= t('msgraph_mail.text_admin_consent') %></li>
+          <li><%= t('msgraph_mail.text_sender_mailbox') %></li>
         </ul>
       </div>
     </div>
