@@ -1,208 +1,93 @@
 # OpenProject MS Graph Mail Module
 
-Provides Microsoft Graph API email delivery for OpenProject, replacing SMTP with OAuth2-based mail sending via Microsoft 365.
+Send emails via Microsoft Graph API instead of SMTP. This is useful for Microsoft 365 / Azure AD environments where SMTP relay is restricted.
 
-## Why Use This?
+## Features
 
-- **Modern Authentication**: Uses OAuth2 client credentials flow instead of username/password
-- **Better Security**: No SMTP passwords stored, uses short-lived tokens
-- **Microsoft 365 Integration**: Native support for M365/Exchange Online
-- **Firewall Friendly**: Uses HTTPS (port 443) instead of SMTP ports
-
-## Requirements
-
-- OpenProject 13.0+
-- Azure AD tenant with admin access
-- Microsoft 365 mailbox for sending
+- 📧 Send emails via Microsoft Graph API
+- 🔐 Azure AD App Registration authentication (Client Credentials flow)
+- 🎛️ Admin UI for configuration and testing
+- ✅ Test connection and send test emails from admin panel
+- 🌐 Supports all OpenProject email notifications
 
 ## Installation
 
-1. Add to `Gemfile.modules`:
-
-```ruby
-gem 'openproject-msgraph_mail', path: 'modules/msgraph_mail'
-```
-
-2. Run bundle install:
-
-```bash
-bundle install
-```
-
-3. Set the delivery method:
-
-```bash
-export OPENPROJECT_EMAIL_DELIVERY_METHOD=msgraph
-```
-
-## Azure AD Configuration
-
-### 1. Register an Application
-
-1. Go to [Azure Portal](https://portal.azure.com) > Azure Active Directory > App registrations
-2. Click **New registration**
-3. Name: "OpenProject Mail" (or your preference)
-4. Supported account types: "Accounts in this organizational directory only"
-5. Click **Register**
-
-### 2. Note Your IDs
-
-From the app's Overview page, copy:
-- **Application (client) ID** → `MSGRAPH_CLIENT_ID`
-- **Directory (tenant) ID** → `MSGRAPH_TENANT_ID`
-
-### 3. Create a Client Secret
-
-1. Go to **Certificates & secrets**
-2. Click **New client secret**
-3. Set description and expiry
-4. Copy the **Value** (shown only once) → `MSGRAPH_CLIENT_SECRET`
-
-### 4. Add API Permissions
-
-1. Go to **API permissions**
-2. Click **Add a permission**
-3. Select **Microsoft Graph**
-4. Select **Application permissions** (not Delegated)
-5. Search for and add: `Mail.Send`
-6. Click **Grant admin consent for [Your Organization]**
-
-### 5. Verify Permissions
-
-Your API permissions should show:
-- `Mail.Send` - Application - Granted for [Your Organization]
+This module is bundled with the custom OpenProject distribution. No additional installation required.
 
 ## Configuration
 
-### Option A: Environment Variables (Recommended for Docker)
+### 1. Azure AD Setup
+
+1. Go to [Azure Portal → App registrations](https://portal.azure.com/#blade/Microsoft_AAD_RegisteredApps/ApplicationsListBlade)
+2. Create a new registration (or select an existing one)
+3. Note the **Application (client) ID** and **Directory (tenant) ID**
+4. Under **Certificates & secrets**, create a new client secret
+5. Under **API permissions**, add:
+   - Microsoft Graph → Application permissions → **Mail.Send**
+6. Grant admin consent for the permissions
+
+### 2. Environment Variables
+
+Set the following environment variables in your OpenProject deployment:
 
 ```bash
-# Required
-OPENPROJECT_EMAIL_DELIVERY_METHOD=msgraph
-MSGRAPH_TENANT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-MSGRAPH_CLIENT_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
-MSGRAPH_CLIENT_SECRET=your-client-secret-value
+MSGRAPH_TENANT_ID=your-azure-tenant-id
+MSGRAPH_CLIENT_ID=your-app-client-id
+MSGRAPH_CLIENT_SECRET=your-app-client-secret
 MSGRAPH_SENDER_EMAIL=noreply@yourdomain.com
 
 # Optional
 MSGRAPH_SENDER_NAME=OpenProject
 MSGRAPH_SAVE_TO_SENT_ITEMS=true
+
+# To auto-activate on startup
+EMAIL_DELIVERY_METHOD=msgraph
 ```
 
-### Option B: Admin UI
+### 3. Admin UI
 
-1. Go to **Administration** > **Plugins**
-2. Find **OpenProject MS Graph Mail** and click **Configure**
-3. Fill in the settings
-4. Ensure `OPENPROJECT_EMAIL_DELIVERY_METHOD=msgraph` is set
+1. Go to **Administration → Emails and notifications → MS Graph Mail**
+2. Verify all configuration values show ✓
+3. Click **Test Connection** to validate Azure credentials
+4. Click **Send Test Email** to verify email delivery
+5. Click **Activate MS Graph Mail** to enable
 
-### Docker Compose Example
+## Admin Menu Location
 
-```yaml
-version: '3.8'
-services:
-  openproject:
-    image: openproject/openproject:14
-    environment:
-      OPENPROJECT_EMAIL_DELIVERY_METHOD: msgraph
-      MSGRAPH_TENANT_ID: ${MSGRAPH_TENANT_ID}
-      MSGRAPH_CLIENT_ID: ${MSGRAPH_CLIENT_ID}
-      MSGRAPH_CLIENT_SECRET: ${MSGRAPH_CLIENT_SECRET}
-      MSGRAPH_SENDER_EMAIL: openproject@yourdomain.com
-      MSGRAPH_SENDER_NAME: OpenProject Notifications
 ```
-
-## Testing
-
-### Rails Console Test
-
-```ruby
-# In OpenProject Rails console
-ActionMailer::Base.mail(
-  to: 'test@example.com',
-  subject: 'Test from OpenProject',
-  body: 'This is a test email via MS Graph'
-).deliver_now
-```
-
-### Check Configuration
-
-```ruby
-# Verify configuration is loaded
-OpenProject::MsgraphMail.configuration.valid?
-# => true
-
-OpenProject::MsgraphMail.configuration.to_h
-# => { tenant_id: "...", client_id: "...", ... }
+Administration
+└── Emails and notifications
+    ├── Aggregation
+    ├── Email notifications
+    ├── MS Graph Mail          ← This module
+    └── Incoming emails
 ```
 
 ## Troubleshooting
 
-### "Authentication failed"
+### "Connection failed" error
+- Verify Tenant ID, Client ID, and Client Secret are correct
+- Check that the Azure AD app has the Mail.Send permission
+- Ensure admin consent was granted
 
-- Verify tenant ID, client ID, and client secret are correct
-- Ensure the client secret hasn't expired
-- Check Azure AD > App registrations > Your app > Overview
+### "Failed to send test email"
+- Verify the sender email exists as a mailbox or shared mailbox in Microsoft 365
+- The Azure AD app needs Mail.Send permission for that mailbox
+- Check that the mailbox is licensed and active
 
-### "Permission denied"
-
-- Verify `Mail.Send` permission is added as **Application permission** (not Delegated)
-- Ensure admin consent has been granted
-- Check Azure AD > App registrations > Your app > API permissions
-
-### "Invalid sender"
-
-- The sender email must be a valid mailbox in your M365 tenant
-- Shared mailboxes work, but verify the address is correct
-
-### Token Caching
-
-Tokens are cached in memory for their lifetime (typically 1 hour). To clear:
-
-```ruby
-OpenProject::MsgraphMail::TokenManager.clear_cache!
-```
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│ OpenProject                                                  │
-│  ┌─────────────────┐    ┌─────────────────────────────────┐ │
-│  │ ActionMailer    │───>│ DeliveryMethod                  │ │
-│  │ deliver_now/    │    │ - Converts Mail::Message to     │ │
-│  │ deliver_later   │    │   MS Graph sendMail payload     │ │
-│  └─────────────────┘    └───────────────┬─────────────────┘ │
-│                                         │                    │
-│                         ┌───────────────▼─────────────────┐ │
-│                         │ TokenManager                    │ │
-│                         │ - OAuth2 client credentials     │ │
-│                         │ - Thread-safe token caching     │ │
-│                         └───────────────┬─────────────────┘ │
-└─────────────────────────────────────────┼───────────────────┘
-                                          │
-                          ┌───────────────▼───────────────┐
-                          │ Azure AD Token Endpoint       │
-                          │ login.microsoftonline.com     │
-                          └───────────────┬───────────────┘
-                                          │ Access Token
-                          ┌───────────────▼───────────────┐
-                          │ Microsoft Graph API           │
-                          │ POST /users/{id}/sendMail     │
-                          └───────────────────────────────┘
-```
-
-## Security Considerations
-
-- Client secrets should be rotated regularly (Azure allows up to 2 year expiry)
-- Use environment variables or secrets management for credentials
-- The `Mail.Send` permission allows sending as any user in the tenant - restrict the sender email in configuration
-- Consider using [certificate-based authentication](https://learn.microsoft.com/en-us/azure/active-directory/develop/certificate-credentials) for production
+### Module not showing in admin menu
+- Restart OpenProject after configuration changes
+- Check Rails logs for any startup errors
 
 ## License
 
-GPLv3 - See LICENSE file
+GNU General Public License v3.0
 
 ## Author
 
 Jan Hübener / DATAGROUP SE
+
+## Links
+
+- [Microsoft Graph Mail.Send API](https://learn.microsoft.com/en-us/graph/api/user-sendmail)
+- [Azure AD App Registration](https://learn.microsoft.com/en-us/azure/active-directory/develop/quickstart-register-app)
