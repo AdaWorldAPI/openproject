@@ -20,53 +20,56 @@ module OpenProject
       register "openproject-msgraph_mail",
                bundled: true,
                author_url: "https://github.com/AdaWorldAPI/openproject" do
-        # Settings accessible via Setting model
-        settings default: {
-          "msgraph_tenant_id" => nil,
-          "msgraph_client_id" => nil,
-          "msgraph_client_secret" => nil,
-          "msgraph_sender_email" => nil,
-          "msgraph_sender_name" => "OpenProject",
-          "msgraph_save_to_sent_items" => true
-        },
-                 partial: "settings/msgraph_mail"
+        # Add menu item under "Emails and notifications"
+        menu :admin_menu,
+             :msgraph_mail_settings,
+             { controller: "/msgraph_mail/settings", action: :show },
+             parent: :mail_and_notifications,
+             after: :mail_notifications,
+             caption: :"msgraph_mail.menu_title",
+             if: ->(_) { User.current.admin? }
       end
 
+      # Register the delivery method with ActionMailer
       initializer "msgraph_mail.register_delivery_method" do
         ActiveSupport.on_load(:action_mailer) do
-          # Register :msgraph as a valid delivery method
           ActionMailer::Base.add_delivery_method(:msgraph, OpenProject::MsgraphMail::DeliveryMethod)
         end
       end
 
+      # Configure from environment variables
       initializer "msgraph_mail.configure", after: "openproject.configuration" do
-        # Sync settings from OpenProject's Setting model to our configuration
         OpenProject::MsgraphMail.configure do |config|
-          config.tenant_id = Setting.plugin_openproject_msgraph_mail["msgraph_tenant_id"].presence ||
-                             ENV.fetch("MSGRAPH_TENANT_ID", nil)
-          config.client_id = Setting.plugin_openproject_msgraph_mail["msgraph_client_id"].presence ||
-                             ENV.fetch("MSGRAPH_CLIENT_ID", nil)
-          config.client_secret = Setting.plugin_openproject_msgraph_mail["msgraph_client_secret"].presence ||
-                                 ENV.fetch("MSGRAPH_CLIENT_SECRET", nil)
-          config.sender_email = Setting.plugin_openproject_msgraph_mail["msgraph_sender_email"].presence ||
-                                ENV.fetch("MSGRAPH_SENDER_EMAIL", nil)
-          config.sender_name = Setting.plugin_openproject_msgraph_mail["msgraph_sender_name"].presence ||
-                               ENV.fetch("MSGRAPH_SENDER_NAME", "OpenProject")
-          config.save_to_sent_items = Setting.plugin_openproject_msgraph_mail["msgraph_save_to_sent_items"] != false
+          config.tenant_id = ENV.fetch("MSGRAPH_TENANT_ID", nil)
+          config.client_id = ENV.fetch("MSGRAPH_CLIENT_ID", nil)
+          config.client_secret = ENV.fetch("MSGRAPH_CLIENT_SECRET", nil)
+          config.sender_email = ENV.fetch("MSGRAPH_SENDER_EMAIL", nil)
+          config.sender_name = ENV.fetch("MSGRAPH_SENDER_NAME", "OpenProject")
+          config.save_to_sent_items = ENV.fetch("MSGRAPH_SAVE_TO_SENT_ITEMS", "true") == "true"
         end
       rescue StandardError => e
-        Rails.logger.warn "MS Graph Mail: Could not load settings: #{e.message}"
+        Rails.logger.warn "MS Graph Mail: Could not load configuration: #{e.message}"
       end
 
+      # Auto-configure mailer if EMAIL_DELIVERY_METHOD=msgraph is set
+      initializer "msgraph_mail.auto_configure", after: "msgraph_mail.configure" do
+        next unless ENV["EMAIL_DELIVERY_METHOD"] == "msgraph"
+        next unless OpenProject::MsgraphMail.configuration.valid?
+
+        Rails.application.config.after_initialize do
+          ActionMailer::Base.delivery_method = :msgraph
+          ActionMailer::Base.msgraph_settings = OpenProject::MsgraphMail.configuration.to_h
+          Rails.logger.info "MS Graph Mail: Auto-configured as delivery method via EMAIL_DELIVERY_METHOD env"
+        end
+      end
+
+      # Extend Setting class to handle msgraph delivery method
       config.to_prepare do
-        # Extend Setting class to handle msgraph delivery method
-        # MailSettings is extended as class methods on Setting
         Setting.singleton_class.prepend(OpenProject::MsgraphMail::MailSettingsExtension)
       end
     end
 
     # Extension to handle msgraph delivery method in Setting::MailSettings
-    # This extends Setting's class methods since MailSettings is `extend`ed
     module MailSettingsExtension
       def reload_mailer_settings!
         super
